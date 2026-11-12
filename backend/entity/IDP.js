@@ -54,10 +54,7 @@ class IDP {
 
   /** All projects for the User Admin inventory, including suspended/private projects. */
   getAllIDPsForAdmin() {
-    return this.db.prepare(`SELECT i.*, a.username AS designer_name, a.is_active AS designer_is_active,
-      (SELECT m.id FROM idp_media m WHERE m.idp_id=i.id AND m.mime_type LIKE 'image/%' ORDER BY m.id LIMIT 1) AS cover_media_id
-      FROM idp i JOIN user_account a ON a.id=i.designer_id
-      ORDER BY i.created_at DESC, i.id DESC`).all().map((row) => ({
+    return this.db.prepare(`${IDP.SELECT} ORDER BY i.created_at DESC, i.id DESC`).all().map((row) => ({
       ...IDP.fromRow(row),
       designerIsActive: Boolean(row.designer_is_active),
     }));
@@ -193,7 +190,7 @@ class IDP {
 }
 
 IDP.SELECT = `
-  SELECT i.*, a.username AS designer_name,
+  SELECT i.*, a.username AS designer_name, a.is_active AS designer_is_active,
     (SELECT m.id FROM idp_media m WHERE m.idp_id = i.id AND m.mime_type LIKE 'image/%' ORDER BY m.id LIMIT 1) AS cover_media_id
     FROM idp i
     JOIN user_account a ON a.id = i.designer_id`;
